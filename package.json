@@ -1,7 +1,7 @@
 {
   "name": "flux-streaming-platform",
   "version": "1.0.0",
-  "description": "A modern streaming platform clone built with React, TypeScript, and Vite. Features 75K+ movies and TV shows via TMDB API.",
+  "description": "A Netflix-inspired streaming platform UI built with React, TypeScript, and Vite. Educational demonstration project showcasing modern web development, API integration, and responsive design patterns.",
   "type": "module",
   "author": "",
   "license": "MIT",

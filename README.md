@@ -260,6 +260,21 @@ This project does not promote or facilitate piracy in any way. It is a technical
 
 **Made with ❤️ using React + TypeScript + Vite**
 
-⭐ Star this repo if you find it helpful!
+[⭐ Star this repo](https://github.com/Ennyw/flux) if you find it helpful!
+
+**📖 Read the [Repository Setup Guide](REPOSITORY_SETUP.md) to make your fork look professional**
+
+---
+
+### 📈 Repository Stats
+
+![GitHub repo size](https://img.shields.io/github/repo-size/Ennyw/flux)
+![GitHub language count](https://img.shields.io/github/languages/count/Ennyw/flux)
+![GitHub top language](https://img.shields.io/github/languages/top/Ennyw/flux)
+![GitHub last commit](https://img.shields.io/github/last-commit/Ennyw/flux/main)
+
+### 🌟 Show Your Support
+
+Give a ⭐ if this project helped you!
 
 </div>
