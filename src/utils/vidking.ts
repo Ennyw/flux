@@ -3,8 +3,8 @@ import { getProgress } from './storage';
 
 /**
  * Builds Vidking embed URL for content.
- * Note: Vidking uses multiple servers (vidking.net, vidking1.net, vidking2.net, etc.)
- * The iframe will automatically redirect to the appropriate server.
+ * Note: Vidking is a third-party streaming service (vidking.net, vidking1.net, vidking2.net, etc.)
+ * The developer has no control or responsibility for content provided by Vidking.
  * Our postMessage handlers accept messages from any vidking domain.
  */
 export const buildVidkingUrl = (content: Content, forceSeason?: number, forceEpisode?: number): string => {

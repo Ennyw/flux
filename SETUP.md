@@ -65,11 +65,11 @@ npm run preview
 ⚠️ **AI-Generated Project & Third-Party Services**: 
 
 - This entire project was **created using AI development tools** (AI-assisted)
-- This application uses **ppv.to API** (or other third-party APIs) for video streaming
+- This application uses **Vidking API** (for movies/TV shows) and **ppv.to API** (for sports streams) or other third-party APIs for video streaming
 - The developer has **no control, knowledge, or responsibility** for what content these services provide
 - The developer does **not endorse** any third-party streaming services
 - You are **solely responsible** for:
-  - Verifying ppv.to's terms of service (or any other API used)
+  - Verifying Vidking's and ppv.to's terms of service (or any other API used)
   - Ensuring compliance with copyright laws
   - Understanding that content is streamed through third-party services
 

@@ -28,25 +28,27 @@ This project uses third-party APIs and services:
 
 - **TMDB API**: Public movie/TV metadata API (requires free API key)
 - **TheSportsDB API**: Public sports data API
-- **ppv.to API**: Third-party video streaming service (accessed via VITE_STREAMS_API_URL)
+- **Vidking API**: Third-party video streaming service for movies/TV shows (vidking.net)
+- **ppv.to API**: Third-party video streaming service for sports streams (accessed via VITE_STREAMS_API_URL)
 
 ### Important Third-Party Service Notice
 
 **⚠️ CRITICAL LEGAL NOTICE:**
 
-This application uses **ppv.to** (or other third-party streaming APIs) for video content. The developer explicitly disclaims:
+This application uses **Vidking** (for movies/TV) and **ppv.to** (for sports streams) or other third-party streaming APIs for video content. The developer explicitly disclaims:
 
 **By using this project, you acknowledge that:**
 
-1. **Video Content**: Video playback is handled entirely by ppv.to API or other third-party streaming services
+1. **Video Content**: Video playback is handled entirely by Vidking, ppv.to, or other third-party streaming services
 2. **No Control**: The developers have NO control, knowledge, or responsibility for what content these services stream
-3. **No Endorsement**: The developers do NOT endorse, verify, approve, or guarantee the legitimacy of ppv.to or any third-party streaming services
-4. **No Affiliation**: The developers have NO affiliation, partnership, or relationship with ppv.to or any streaming service providers
-5. **Terms of Service**: You are solely responsible for reading and complying with ppv.to's terms of service
+3. **No Endorsement**: The developers do NOT endorse, verify, approve, or guarantee the legitimacy of Vidking, ppv.to, or any third-party streaming services
+4. **No Affiliation**: The developers have NO affiliation, partnership, or relationship with Vidking, ppv.to, or any streaming service providers
+5. **Terms of Service**: You are solely responsible for reading and complying with all third-party service terms of service
 6. **Content Legality**: You are solely responsible for verifying that content accessed through these services complies with applicable copyright laws
 7. **User Responsibility**: You are solely responsible for ensuring your use complies with all applicable laws
 8. **No Liability**: The developers are NOT liable for any content accessed through third-party APIs
 9. **AI-Generated**: This project was AI-generated; the developer had no intent to facilitate any illegal activity
+10. **No Knowledge**: The developer has no knowledge of what content these services provide or their licensing status
 
 **THE DEVELOPER EXPLICITLY DISCLAIMS ALL RESPONSIBILITY FOR ANY CONTENT ACCESSED THROUGH THIRD-PARTY STREAMING SERVICES.**
 
@@ -107,13 +109,14 @@ If you have concerns about this project, please open an issue on GitHub.
 
 **The developer of this project explicitly states:**
 
-1. This project was **AI-generated** using AI development tools
-2. The developer has **no knowledge** of what content ppv.to or other third-party services provide
+1. This project was **AI-generated** using AI development tools (Cursor/Composer AI)
+2. The developer has **no knowledge** of what content Vidking, ppv.to, or other third-party services provide
 3. The developer has **no control** over third-party API responses or content
-4. The developer does **not endorse** any third-party streaming services
+4. The developer does **not endorse** any third-party streaming services (Vidking, ppv.to, or others)
 5. The developer created this as a **technical/educational UI demonstration only**
 6. Any use of third-party services is **solely at the user's own risk**
 7. The developer is **absolved** of any responsibility for content accessed through third-party APIs
+8. The developer had **no intent** to facilitate copyright infringement or illegal streaming
 
 **Legal Protection**: This project is an AI-generated educational demonstration. The developer is not responsible for the actions, content, or services of third-party APIs used by this application.
 
