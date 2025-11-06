@@ -7,7 +7,13 @@ A Netflix-inspired streaming platform UI built with React, TypeScript, and Vite.
 [![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> **Note:** Add screenshots here when you deploy or take screenshots of the UI
+<div align="center">
+  <img src="screenshots/home.png" alt="Flux Home Page" width="800"/>
+  <p><em>Home page featuring featured content hero section</em></p>
+  
+  <img src="screenshots/search.png" alt="Flux Search Page" width="800"/>
+  <p><em>Advanced search with filters and trending content</em></p>
+</div>
 
 ## Features
 
@@ -51,10 +57,16 @@ React 18 • TypeScript • Vite • TMDB API • TheSportsDB
 
 - Modern React patterns (hooks, context)
 - TypeScript best practices
-- API integration
-- Responsive design
+- API integration with TMDB
+- Responsive design patterns
 - Component architecture
 - State management
+
+## Documentation
+
+- [Setup Guide](SETUP.md) - Complete setup instructions
+- [Contributing](CONTRIBUTING.md) - How to contribute
+- [Security](SECURITY.md) - Security policy
 
 ## License
 

@@ -31,3 +31,9 @@ dist-ssr
 # Build outputs
 *.tsbuildinfo
 
+# Screenshots (keep directory but ignore large files)
+screenshots/*.png
+screenshots/*.jpg
+screenshots/*.jpeg
+!screenshots/.gitkeep
+
