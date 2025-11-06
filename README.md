@@ -71,9 +71,29 @@ React 18 • TypeScript • Vite • TMDB API • TheSportsDB
 - [Contributing](CONTRIBUTING.md) - How to contribute
 - [Security](SECURITY.md) - Security policy
 
+## Third-Party Services
+
+This project uses third-party APIs:
+
+- **TMDB API** - Movie/TV metadata (free API key required)
+- **TheSportsDB API** - Sports data (optional)
+- **Vidking API** - Video streaming service
+
+⚠️ **Important**: Video content is streamed through Vidking API, a third-party service. By using this application, you acknowledge that:
+- You are responsible for verifying Vidking's terms of service
+- You are responsible for compliance with all applicable copyright laws
+- The developers are not liable for content accessed through third-party APIs
+- This project is intended for **local/private use** only
+
+See [DISCLAIMER.md](DISCLAIMER.md) for complete legal information.
+
 ## License
 
 MIT License - see [LICENSE](LICENSE)
+
+## Disclaimer
+
+This project is for **educational purposes only**. It is a UI/UX demonstration showcasing modern web development techniques. No copyrighted content is hosted or distributed. Users are solely responsible for compliance with all applicable laws, terms of service, and copyright regulations when using third-party APIs and services.
 
 ---
 

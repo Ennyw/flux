@@ -60,6 +60,15 @@ npm run build
 npm run preview
 ```
 
+## Important Notice
+
+⚠️ **Third-Party Services**: This application uses Vidking API for video streaming. You are responsible for:
+- Verifying Vidking's terms of service
+- Ensuring compliance with copyright laws
+- Understanding that content is streamed through third-party services
+
+**This project is intended for local/private use. Use responsibly.**
+
 ## Troubleshooting
 
 **API Key Warning Banner:**
