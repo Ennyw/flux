@@ -1,5 +1,5 @@
 import { Content } from '@/types';
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { ContentCard } from './ContentCard';
 import './ContentGrid.css';
 
@@ -11,9 +11,7 @@ interface ContentGridProps {
 }
 
 export const ContentGrid = ({ title, items, onCardClick, featured = false }: ContentGridProps) => {
-  const [isAnyPreviewing, setIsAnyPreviewing] = useState(false);
   const handlePreviewChange = useCallback((active: boolean) => {
-    setIsAnyPreviewing(prev => (active ? true : false));
     // Bubble a custom event so App/Hero can pause banner as a fallback signal
     const ev = new CustomEvent('flux:preview', { detail: { active } });
     window.dispatchEvent(ev);

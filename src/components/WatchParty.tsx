@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { Content } from '@/types';
-import { buildVidkingUrl } from '@/utils/vidking';
 import './WatchParty.css';
 
 interface WatchPartyProps {
@@ -12,11 +11,9 @@ interface WatchPartyProps {
 export const WatchParty = ({ content, playerUrl, onClose }: WatchPartyProps) => {
   const [roomId, setRoomId] = useState<string>('');
   const [isHost, setIsHost] = useState(false);
-  const [participants, setParticipants] = useState<string[]>(['You']);
-  const [isSynced, setIsSynced] = useState(false);
+  const [participants] = useState<string[]>(['You']);
+  const [isSynced] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const wsRef = useRef<WebSocket | null>(null);
-  const playerTimeRef = useRef(0);
 
   useEffect(() => {
     // Generate room ID
@@ -26,9 +23,10 @@ export const WatchParty = ({ content, playerUrl, onClose }: WatchPartyProps) => 
     
     // In production: connect to WebSocket server for real sync
     // For now, simulate with localStorage events
-    const handleSync = (e: StorageEvent) => {
-      if (e.key?.startsWith(`watchparty_${id}`)) {
-        const data = JSON.parse(e.value || '{}');
+    const handleSync = (e: Event) => {
+      const storageEvent = e as StorageEvent;
+      if (storageEvent.key?.startsWith(`watchparty_${id}`)) {
+        const data = JSON.parse(storageEvent.newValue || '{}');
         if (data.type === 'play' && !isHost) {
           // Sync playback
         }
@@ -36,7 +34,7 @@ export const WatchParty = ({ content, playerUrl, onClose }: WatchPartyProps) => 
     };
     window.addEventListener('storage', handleSync);
     return () => window.removeEventListener('storage', handleSync);
-  }, []);
+  }, [isHost]);
 
   if (!content) return null;
 

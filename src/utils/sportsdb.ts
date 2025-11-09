@@ -554,7 +554,7 @@ export const getHeadToHead = async (teamA: string, teamB: string): Promise<HeadT
 export const calculateHeadToHeadStats = (
   matches: HeadToHeadMatch[],
   teamA: string,
-  teamB: string
+  _teamB: string
 ): HeadToHeadStats => {
   let teamAWins = 0;
   let teamBWins = 0;

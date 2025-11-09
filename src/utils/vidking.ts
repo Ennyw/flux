@@ -53,7 +53,16 @@ export const buildVidkingUrl = (content: Content, forceSeason?: number, forceEpi
     }
 
     if (resumeAt >= minimumResumeSeconds) {
-      params.append('progress', resumeAt.toString());
+      // For resumes > 5 minutes, don't use URL progress parameter
+      // PlayerModal will handle seeking via postMessage after player is ready
+      // This prevents audio/video desync and buffering issues
+      if (resumeAt > 300) { // > 5 minutes
+        // Don't add progress param - PlayerModal will seek after ready
+        // Just let player load from start
+      } else {
+        // For short resumes (<5min), URL param is fine
+        params.append('progress', resumeAt.toString());
+      }
     }
   }
   

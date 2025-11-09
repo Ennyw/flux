@@ -1,8 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 export const useTVNavigation = () => {
-  const focusableRef = useRef<HTMLElement | null>(null);
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Skip if user is typing in an input

@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Category } from '@/types';
 import './Navbar.css';
+import { useSpatialListNavigation } from '@/hooks/useSpatialListNavigation';
 
 interface NavbarProps {
   currentCategory: Category;
@@ -17,6 +18,9 @@ export const Navbar = ({ currentCategory, onCategoryChange, searchQuery, onSearc
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const linksRef = useRef<HTMLDivElement>(null);
+  useSpatialListNavigation(linksRef as any, { itemSelector: '.nav-link' });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,13 +70,20 @@ export const Navbar = ({ currentCategory, onCategoryChange, searchQuery, onSearc
           Flux
         </div>
         
-        <div className="nav-links">
+        <div className="nav-links" ref={linksRef as any} tabIndex={0}>
           <button
             className={`nav-link ${currentCategory === 'all' && location.pathname === '/' ? 'active' : ''}`}
             onClick={handleHomeClick}
             aria-label="Home"
           >
             Home
+          </button>
+          <button
+            className={`nav-link ${location.pathname === '/ai' ? 'active' : ''}`}
+            onClick={() => navigate('/ai')}
+            aria-label="AI Recommendations"
+          >
+            AI
           </button>
           <button
             className={`nav-link ${currentCategory === 'movies' && location.pathname === '/' ? 'active' : ''}`}

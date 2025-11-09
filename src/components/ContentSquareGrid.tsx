@@ -1,5 +1,5 @@
 import { Content } from '@/types';
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
 import { ContentCard } from './ContentCard';
 import './ContentSquareGrid.css';
 
@@ -11,9 +11,7 @@ interface ContentSquareGridProps {
 }
 
 export const ContentSquareGrid = ({ title, items, onCardClick, actorPhoto }: ContentSquareGridProps) => {
-  const [isAnyPreviewing, setIsAnyPreviewing] = useState(false);
   const handlePreviewChange = useCallback((active: boolean) => {
-    setIsAnyPreviewing(prev => (active ? true : false));
     const ev = new CustomEvent('flux:preview', { detail: { active } });
     window.dispatchEvent(ev);
   }, []);

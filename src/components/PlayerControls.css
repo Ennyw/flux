@@ -3,6 +3,18 @@
   bottom: 100px; /* Increased from 20px to account for macOS dock */
   right: 20px;
   z-index: 10;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Ensure controls are above dock on macOS */

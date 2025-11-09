@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
-import { PlayerEvent, WatchProgress } from '@/types';
-import { saveProgress, getProgress } from '@/utils/storage';
+import { WatchProgress } from '@/types';
+import { saveProgress } from '@/utils/storage';
 
 export const usePlayerTracking = () => {
   const lastSavedAtRef = useRef(0);

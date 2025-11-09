@@ -34,3 +34,6 @@ dist-ssr
 # Screenshots (keep screenshots but ignore temp files)
 # screenshots/*.png  # Uncomment to ignore screenshots
 
+# Local reference files (not for repo)
+GITHUB_TOPICS.md
+

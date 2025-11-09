@@ -43,8 +43,6 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
-> 💡 **Want to showcase this?** Deploy to Vercel/Netlify and add the live demo link here!
-
 ## Setup
 
 1. Get a free TMDB API key: https://www.themoviedb.org/settings/api

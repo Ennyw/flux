@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Content, WatchProgress } from '@/types';
-import { getProgress, saveProgress, getIntroMarkers, saveIntroMarkers, clearIntroMarkers, toggleMyList, isInMyList, getMyList } from '@/utils/storage';
+import { getProgress, saveProgress, getIntroMarkers, saveIntroMarkers, clearIntroMarkers, toggleMyList, isInMyList } from '@/utils/storage';
 import { getSeasonEpisodes, TMDBEpisode, getCredits, TMDBCast, getRecommendations, getTVShowDetails, TMDBTVDetails } from '@/utils/tmdb';
 import { WatchParty } from './WatchParty';
 import { PlayerControls } from './PlayerControls';
@@ -32,15 +32,47 @@ export const PlayerModal = ({ content, playerUrl, onClose }: PlayerModalProps) =
   const lastEpisodeRef = useRef<number | null>(null);
   const [skipDone, setSkipDone] = useState(false);
   const [showWatchParty, setShowWatchParty] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [showControls, setShowControls] = useState(false);
+  const [, setPlaybackSpeed] = useState(1);
+  const [showControls, setShowControls] = useState(true);
   const [tvShowDetails, setTvShowDetails] = useState<TMDBTVDetails | null>(null);
   const [loadingTVDetails, setLoadingTVDetails] = useState(false);
   const [isManualEpisodeSelect, setIsManualEpisodeSelect] = useState(false);
+  const manualSelectRef = useRef<{season: number; episode: number} | null>(null);
+  const currentContentIdRef = useRef<number | null>(null);
+  const hasInitializedRef = useRef(false);
+  // Removed unused state variables
+  const pendingSeekRef = useRef<number | null>(null);
+  const hasSeenPlayerReadyRef = useRef(false);
+  const hideControlsTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Get actual seasons from TMDB (filter out season 0 which is usually specials)
   const actualSeasons = tvShowDetails?.seasons?.filter(s => s.season_number > 0) || [];
   const totalSeasons = actualSeasons.length > 0 ? actualSeasons.length : (tvShowDetails?.number_of_seasons || 0);
+
+  // Auto-hide controls after 3 seconds of inactivity
+  const resetHideControlsTimer = () => {
+    // Clear existing timer
+    if (hideControlsTimeoutRef.current) {
+      clearTimeout(hideControlsTimeoutRef.current);
+    }
+    
+    // Show controls
+    setShowControls(true);
+    
+    // Set new timer to hide controls after 3 seconds
+    hideControlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 3000);
+  };
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (hideControlsTimeoutRef.current) {
+        clearTimeout(hideControlsTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Build player URL for a specific episode
   const buildEpisodeUrl = (season: number, episode: number, enableNextEpisode: boolean = false, resumeProgress: boolean = false) => {
@@ -75,8 +107,21 @@ export const PlayerModal = ({ content, playerUrl, onClose }: PlayerModalProps) =
           resumeAt = Math.max(0, Math.floor(savedProgress.duration - 60));
         }
         
+        // Only apply progress if resume time is significant
         if (resumeAt >= minimumResumeSeconds) {
-          params.append('progress', resumeAt.toString());
+          // For any resume > 5 minutes, don't use URL progress parameter
+          // Instead, save the seek position and seek after player is ready
+          // This prevents audio/video desync and buffering issues
+          if (resumeAt > 300) { // > 5 minutes
+            // Store the target position for later seek via postMessage
+            pendingSeekRef.current = resumeAt;
+            hasSeenPlayerReadyRef.current = false;
+            // Don't add progress param to URL - let player load from start
+            // We'll seek after it's ready
+          } else {
+            // For short resumes (<5min), URL param is fine
+            params.append('progress', resumeAt.toString());
+          }
         }
       }
     }
@@ -85,28 +130,70 @@ export const PlayerModal = ({ content, playerUrl, onClose }: PlayerModalProps) =
   };
 
   // Sync iframe src whenever a new content/playerUrl arrives
+  // BUT: Only on initial load or when content changes - not on parent re-renders
   useEffect(() => {
     if (!content) {
       setIsManualEpisodeSelect(false);
+      manualSelectRef.current = null;
+      currentContentIdRef.current = null;
+      hasInitializedRef.current = false;
       return;
     }
     
+    // Check if this is a new content item (different show/movie)
+    const isNewContent = currentContentIdRef.current !== content.id;
+    
+    if (!isNewContent && hasInitializedRef.current) {
+      // Same content, already initialized - ignore playerUrl prop changes
+      // This prevents parent re-renders from resetting the episode
+      return;
+    }
+    
+    // New content or first initialization - process playerUrl
+    currentContentIdRef.current = content.id;
+    hasInitializedRef.current = true;
+    manualSelectRef.current = null; // Clear manual selection for new content
+    
     if (content.type === 'tv') {
-      // Check if playerUrl already specifies a season/episode (user clicked a specific episode)
+      // Check if playerUrl already specifies a season/episode
       const urlMatch = playerUrl.match(/\/tv\/\d+\/(\d+)\/(\d+)/);
       
       if (urlMatch) {
-        // User explicitly selected an episode - use that one
         const season = parseInt(urlMatch[1]);
         const episode = parseInt(urlMatch[2]);
         setSelectedSeason(season);
         setSelectedEpisode(episode);
-        // Don't enable nextEpisode for explicit selections
-        const explicitUrl = buildEpisodeUrl(season, episode, false, false);
-        setCurrentPlayerUrl(explicitUrl);
-        setIsManualEpisodeSelect(true);
-        setTimeout(() => setIsManualEpisodeSelect(false), 5000);
-        return;
+        
+        // Check if we have saved progress for this exact episode
+        // If yes, this is a resume scenario (user returning to continue watching)
+        // If no, this is a fresh selection (user clicked a new episode)
+        const saved = getProgress(content.id, 'tv');
+        const isResuming = saved?.season === season && saved?.episode === episode && saved.progress > 5;
+        
+        if (isResuming) {
+          // User is resuming this episode - enable nextEpisode and resumeProgress
+          const resumedUrl = buildEpisodeUrl(season, episode, true, true);
+          setCurrentPlayerUrl(resumedUrl);
+          setIsManualEpisodeSelect(false);
+          // Don't set manualSelectRef - this is auto-resume, not manual selection
+          
+          // Check if we need to perform a delayed seek (for resumes > 5 min)
+          // This happens when buildEpisodeUrl didn't add progress param
+          if (saved && saved.currentTime > 300 && pendingSeekRef.current === null) {
+            pendingSeekRef.current = Math.floor(saved.currentTime);
+            hasSeenPlayerReadyRef.current = false;
+          }
+          return;
+        } else {
+          // Fresh episode selection (either new episode or no saved progress)
+          // Don't enable nextEpisode for explicit fresh selections
+          const explicitUrl = buildEpisodeUrl(season, episode, false, false);
+          setCurrentPlayerUrl(explicitUrl);
+          setIsManualEpisodeSelect(true);
+          manualSelectRef.current = { season, episode };
+          setTimeout(() => setIsManualEpisodeSelect(false), 5000);
+          return;
+        }
       }
       
       // No specific episode in URL - use saved progress to resume where they left off
@@ -119,12 +206,28 @@ export const PlayerModal = ({ content, playerUrl, onClose }: PlayerModalProps) =
         const rebuilt = buildEpisodeUrl(saved.season, saved.episode, true, true);
         setCurrentPlayerUrl(rebuilt);
         setIsManualEpisodeSelect(false);
+        
+        // Check if we need to perform a delayed seek (for resumes > 5 min)
+        if (saved && saved.currentTime > 300 && pendingSeekRef.current === null) {
+          pendingSeekRef.current = Math.floor(saved.currentTime);
+          hasSeenPlayerReadyRef.current = false;
+        }
         return;
       }
     }
     
+    // Only set playerUrl if we don't have a manual selection
     setCurrentPlayerUrl(playerUrl);
     setIsManualEpisodeSelect(false);
+    
+    // For movies, also check if we need delayed seek
+    if (content.type === 'movie') {
+      const saved = getProgress(content.id, 'movie');
+      if (saved && saved.currentTime > 300 && pendingSeekRef.current === null) {
+        pendingSeekRef.current = Math.floor(saved.currentTime);
+        hasSeenPlayerReadyRef.current = false;
+      }
+    }
   }, [playerUrl, content]);
 
   // Handle episode selection (user explicitly clicked an episode)
@@ -132,8 +235,9 @@ export const PlayerModal = ({ content, playerUrl, onClose }: PlayerModalProps) =
     setSelectedSeason(season);
     setSelectedEpisode(episode);
     
-    // Mark that this is a manual selection (prevents next episode overlay)
+    // Mark that this is a manual selection (prevents next episode overlay and URL parsing overrides)
     setIsManualEpisodeSelect(true);
+    manualSelectRef.current = { season, episode };
     
     // When user explicitly selects an episode, don't enable nextEpisode auto-advance
     // This prevents it from auto-playing the next episode when re-watching
@@ -157,53 +261,28 @@ export const PlayerModal = ({ content, playerUrl, onClose }: PlayerModalProps) =
       setProgress(newProgress);
     }
     
-    // Reset manual select flag after a delay
-    setTimeout(() => setIsManualEpisodeSelect(false), 5000);
+    // Reset manual select flag after a longer delay (30 seconds instead of 5)
+    // This prevents URL parsing from overriding manual selections
+    setTimeout(() => {
+      setIsManualEpisodeSelect(false);
+      // Keep the ref for longer to prevent resets
+      setTimeout(() => {
+        manualSelectRef.current = null;
+      }, 60000); // Clear ref after 1 minute total
+    }, 30000);
   };
 
+  // This effect only syncs progress state, NOT episode selection
+  // Episode selection is handled by the first useEffect and handleEpisodeSelect
   useEffect(() => {
     if (content) {
       const savedProgress = getProgress(content.id, content.type);
       setProgress(savedProgress);
       
-      // Extract episode info from URL if it's a TV show
-      if (content.type === 'tv') {
-        const urlParts = playerUrl.split('/');
-        const seasonMatch = urlParts[urlParts.length - 2];
-        const episodeMatch = urlParts[urlParts.length - 1]?.split('?')[0];
-        
-        if (seasonMatch && episodeMatch) {
-          const season = parseInt(seasonMatch);
-          const episode = parseInt(episodeMatch);
-          
-          // Set the initial selected season and episode
-          setSelectedSeason(season);
-          setSelectedEpisode(episode);
-          
-          console.log('Extracted from URL - Season:', season, 'Episode:', episode);
-          
-          // Save this episode info to progress
-          if (!savedProgress || savedProgress.season !== season || savedProgress.episode !== episode) {
-            const newProgress: WatchProgress = savedProgress || {
-              id: content.id,
-              mediaType: 'tv',
-              currentTime: 0,
-              duration: 0,
-              progress: 0,
-              lastWatched: Date.now(),
-            };
-            
-            newProgress.season = season;
-            newProgress.episode = episode;
-            
-            console.log('Updating progress with episode info:', newProgress);
-            saveProgress(newProgress);
-            setProgress(newProgress);
-          }
-        }
-      }
+      // Don't extract episode info from URL here - that's handled by the first useEffect
+      // This effect only syncs progress state
     }
-  }, [content, playerUrl]);
+  }, [content]);
 
   // Fetch TV show details (number of seasons) when content changes
   useEffect(() => {
@@ -273,6 +352,36 @@ export const PlayerModal = ({ content, playerUrl, onClose }: PlayerModalProps) =
       const parsed: any = typeof raw === 'string' ? (() => { try { return JSON.parse(raw); } catch { return null; } })() : (raw && typeof raw === 'object' ? raw : null);
       if (!parsed || parsed.type !== 'PLAYER_EVENT') return;
       const data = parsed.data || {};
+      
+      // Check if player is ready and we have a pending seek
+      if ((data.event === 'play' || data.event === 'timeupdate') && !hasSeenPlayerReadyRef.current && pendingSeekRef.current !== null) {
+        hasSeenPlayerReadyRef.current = true;
+        const targetTime = pendingSeekRef.current;
+        pendingSeekRef.current = null;
+        
+        // Wait a moment for player to be fully ready, then seek
+        setTimeout(() => {
+          if (iframeRef.current?.contentWindow && currentPlayerUrl) {
+            try {
+              const url = new URL(currentPlayerUrl);
+              const origin = url.origin;
+              
+              // Send seek command via postMessage
+              iframeRef.current.contentWindow.postMessage({
+                type: 'SEEK',
+                seconds: targetTime
+              }, origin);
+              
+              if (import.meta.env.DEV) {
+                console.log(`Seeking to ${targetTime}s after player ready`);
+              }
+            } catch (error) {
+              console.error('Failed to seek after player ready:', error);
+            }
+          }
+        }, 1500); // Wait 1.5 seconds for player to buffer
+      }
+      
       if (typeof data.currentTime === 'number') setPlayerTime(data.currentTime);
       if (typeof data.season === 'number') lastSeasonRef.current = data.season;
       if (typeof data.episode === 'number') lastEpisodeRef.current = data.episode;
@@ -287,7 +396,7 @@ export const PlayerModal = ({ content, playerUrl, onClose }: PlayerModalProps) =
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [content, selectedSeason, selectedEpisode, isManualEpisodeSelect]);
+  }, [content, selectedSeason, selectedEpisode, isManualEpisodeSelect, currentPlayerUrl]);
 
   // Countdown for next episode autoplay
   useEffect(() => {
@@ -582,13 +691,15 @@ export const PlayerModal = ({ content, playerUrl, onClose }: PlayerModalProps) =
   } : null;
 
   return (
-    <div className="watch-modal">
-      <button className="modal-close" onClick={onClose} title="Close (ESC)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
+    <div className={`watch-modal ${!showControls ? 'hide-cursor' : ''}`} onMouseMove={resetHideControlsTimer}>
+      {showControls && (
+        <button className="modal-close" onClick={onClose} title="Close (ESC)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      )}
       
       {/* Hero Section with Backdrop */}
       <div 
@@ -660,8 +771,8 @@ export const PlayerModal = ({ content, playerUrl, onClose }: PlayerModalProps) =
         <div 
           className="player-container"
           ref={playerContainerRef}
-          onMouseEnter={() => setShowControls(true)}
-          onMouseLeave={() => setShowControls(false)}
+          onMouseMove={resetHideControlsTimer}
+          onMouseEnter={resetHideControlsTimer}
           onDoubleClick={() => {
             // Double-click to enter fullscreen
             const container = playerContainerRef.current;
@@ -680,7 +791,7 @@ export const PlayerModal = ({ content, playerUrl, onClose }: PlayerModalProps) =
               return Promise.reject(new Error('Fullscreen not supported'));
             };
             
-            requestFullscreen(container).catch(err => {
+            requestFullscreen(container).catch((err: unknown) => {
               console.log('Fullscreen request failed:', err);
             });
           }}

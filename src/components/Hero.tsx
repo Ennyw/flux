@@ -87,8 +87,8 @@ export const Hero = ({ content, onPlay, onInfo }: HeroProps) => {
           
           const backdropUrl = backdropPath ? getBackdropUrl(backdropPath) : '';
           
-          // Debug logging
-          if (index === 0) {
+          // Debug logging (only in dev mode, only for first slide)
+          if (import.meta.env.DEV && index === 0) {
             console.log('Hero slide data:', {
               title: item.title,
               backdrop: item.backdrop,

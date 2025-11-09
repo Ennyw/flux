@@ -13,7 +13,7 @@ export const StreamCard = memo(({ stream, onClick }: StreamCardProps) => {
   const live = isStreamLive(stream);
   const upcoming = isStreamUpcoming(stream);
   const [teamLogos, setTeamLogos] = useState<TeamLogoData | null>(null);
-  const [logosLoading, setLogosLoading] = useState(false);
+  const [, setLogosLoading] = useState(false);
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
   const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
   const loadingRef = useRef<Set<string>>(new Set());

@@ -1,4 +1,4 @@
-import { Content, WatchProgress } from '@/types';
+import { Content } from '@/types';
 import { getRecommendations } from './tmdb';
 import { getContinueWatching, getMyList } from './storage';
 
@@ -74,7 +74,7 @@ export const getSmartRecommendations = async (limit: number = 20): Promise<Conte
 
 // "For You" personalized row
 export const getForYouContent = async (): Promise<Content[]> => {
-  const prefs = analyzePreferences();
+  analyzePreferences(); // Analyze but don't use yet
   const smartRecs = await getSmartRecommendations(10);
   
   // Mix with trending based on preferences

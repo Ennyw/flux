@@ -13,7 +13,7 @@ import { buildVidkingUrl } from './utils/vidking';
 import { addToContinueWatching, getContinueWatching, migrateKnownFixes, getMyList } from './utils/storage';
 import { usePlayerTracking } from './hooks/usePlayerTracking';
 import { useTVNavigation } from './hooks/useTVNavigation';
-import { searchTMDB, getTrendingMovies, getTopRatedMovies, getTopRatedTV, getTop10, getByGenre, getTrendingTV, getRecommendations, getUpcomingMovies, getCriticallyAcclaimed, getPopularMovies, getPopularTV, getHiddenGems, getTrendingToday, getMoviesByActor, findCollectionByMovie, getCollection, getRecentlyAdded } from './utils/tmdb';
+import { searchTMDB, getTrendingMovies, getTopRatedMovies, getTopRatedTV, getTop10, getByGenre, getTrendingTV, getRecommendations, getUpcomingMovies, getCriticallyAcclaimed, getHiddenGems, getTrendingToday, getMoviesByActor, findCollectionByMovie, getRecentlyAdded } from './utils/tmdb';
 import { getForYouContent } from './utils/recommendations';
 import { getLiveStreams } from './utils/streams';
 import { MoodSelector } from './components/MoodSelector';
